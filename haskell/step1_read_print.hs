@@ -1,19 +1,20 @@
 import qualified System.Console.Haskeline as HL
 
+import Types
+import Reader
+import Printer
+
 type MalStr = String
 
 
-malRead :: MalStr -> String
-malRead str = str
+malRead :: String -> MVal
+malRead = readStr
 
+malPrint :: MVal -> String
+malPrint = prStr
 
-malPrint :: MalStr -> String
-malPrint str = str
-
-
-malEval :: MalStr -> String
-malEval str = str
-
+malEval :: MVal -> MVal
+malEval = id
 
 rep :: MalStr -> String
 rep = malPrint . malEval . malRead

@@ -2,5 +2,8 @@ module Types where
 
 data MVal =
   MNum Int |
-  MStr String 
-  deriving (Show, Eq)
+  MStr String |
+  MSym Char |
+  MList [MVal]
+  deriving (Eq, Show)
+
