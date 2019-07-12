@@ -3,16 +3,17 @@ import qualified System.Console.Haskeline as HL
 import Types
 import Reader
 import Printer
+--import Env
 
 import qualified Data.Map as Map
 
-type EnvMap = Map.Map Char MVal
+type EnvMap = Map.Map String MVal
 
 replEnv :: EnvMap
-replEnv = Map.fromList [('+', MFun add), ('-', MFun sub), ('/', MFun Main.div), ('*', MFun mul)]
+replEnv = Map.fromList [("+", MFun add), ("-", MFun sub), ("/", MFun Main.div), ("*", MFun mul)]
 
-envLookup :: EnvMap -> Char -> MVal
-envLookup m k = Map.findWithDefault (error ("Unsupported symbol" ++ [k])) k m
+envLookup :: EnvMap -> String -> MVal
+envLookup m k = Map.findWithDefault (error ("Unsupported symbol '" ++ k ++ "'")) k m
 
 collapseList :: ([MVal] -> MVal) -> [MVal] -> MVal
 collapseList _ [MNum n] = MNum n
@@ -41,8 +42,8 @@ mul [MNum x, MNum y] = MNum $ x * y
 mul _ = error "Incorrect arguments to mul."
 div [MNum x, MNum y] = MNum $ x `Prelude.div` y
 div _ = error "Incorrect arguments to div."
--- -------
 
+-- -------
 
 malRead :: String -> MVal
 malRead = readStr

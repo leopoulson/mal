@@ -18,8 +18,8 @@ readStr input = either (error . show) id $ parse readForm "" input
 whitespace :: Parser ()
 whitespace = skipMany $ oneOf  [' ', ',', '\n']
 
-symbol :: Parser Char
-symbol = oneOf "!#$%&|*+-/:<=>?@^_~"
+symbol :: Parser String
+symbol = many1 $ oneOf "!#$%&|*+-/:<=>?@^_~abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 
 str :: Parser String
 str = many1 letter
@@ -45,7 +45,7 @@ readNumber = readNum
 readAtom :: Parser MVal
 readAtom = readNumber
   <|> readSym
-  <|> readString
+  -- <|> readString
 
 readList :: Parser MVal
 readList = MList <$> (char '(' *> whitespace *> readForm `sepEndBy` whitespace <* char ')') 
