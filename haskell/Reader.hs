@@ -27,14 +27,23 @@ str = many1 letter
 readNum :: Parser MVal
 readNum = MNum . read <$> many1 digit
 
+readNegNum :: Parser MVal
+readNegNum = f <$> char '-' <*> many1 digit
+  where
+    f sign number = MNum $ read $ sign : number
+
 readSym :: Parser MVal
 readSym = MSym <$> symbol
 
 readString :: Parser MVal
 readString = MStr <$> str
 
+readNumber :: Parser MVal
+readNumber = readNum
+  <|> try readNegNum
+
 readAtom :: Parser MVal
-readAtom = readNum
+readAtom = readNumber
   <|> readSym
   <|> readString
 

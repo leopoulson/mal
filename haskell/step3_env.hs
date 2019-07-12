@@ -25,7 +25,7 @@ applyList _ mv = mv
 
 eval :: EnvMap -> MVal -> MVal
 eval env (MList ms) = applyList env $ evalAST env (MList ms)
-eval _ mv = mv
+eval env mv = evalAST env mv
 
 evalAST :: EnvMap -> MVal -> MVal
 evalAST env (MList ms) = MList $ map (eval env) ms
@@ -51,7 +51,7 @@ malPrint :: MVal -> String
 malPrint = prStr
 
 malEval :: EnvMap -> MVal -> MVal
-malEval = eval 
+malEval = eval
 
 rep :: String -> String
 rep = malPrint . malEval replEnv . malRead
