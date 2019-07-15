@@ -3,45 +3,43 @@ import qualified System.Console.Haskeline as HL
 import Types
 import Reader
 import Printer
---import Env
+import Env
 
-import qualified Data.Map as Map
+--import qualified Data.Map as Map
 
-type EnvMap = Map.Map String MVal
-
-replEnv :: EnvMap
-replEnv = Map.fromList [("+", MFun add), ("-", MFun sub), ("/", MFun Main.div), ("*", MFun mul)]
-
-envLookup :: EnvMap -> String -> MVal
-envLookup m k = Map.findWithDefault (error ("Unsupported symbol '" ++ k ++ "'")) k m
+replEnv :: Env
+replEnv = set "/" (MFun divd) .
+          set "*" (MFun mul) .
+          set "-" (MFun sub) .
+          set "+" (MFun add) $ newEnv
 
 collapseList :: ([MVal] -> MVal) -> [MVal] -> MVal
 collapseList _ [MNum n] = MNum n
 collapseList f (x : y : rest) = collapseList f (f [x, y] : rest)
 collapseList _ _ = error "Incorrect types for collapse list"
 
-applyList :: EnvMap -> MVal -> MVal
+applyList :: Env -> MVal -> MVal
 applyList _ (MList (MFun op : rest)) = collapseList op rest
 applyList _ mv = mv
 
-eval :: EnvMap -> MVal -> MVal
+eval :: Env -> MVal -> MVal
 eval env (MList ms) = applyList env $ evalAST env (MList ms)
 eval env mv = evalAST env mv
 
-evalAST :: EnvMap -> MVal -> MVal
+evalAST :: Env -> MVal -> MVal
 evalAST env (MList ms) = MList $ map (eval env) ms
-evalAST env (MSym op) = envLookup env op
+evalAST env (MSym op) = get op env
 evalAST _ mv = mv
 
-add, sub, div, mul :: [MVal] -> MVal
+add, sub, divd, mul :: [MVal] -> MVal
 add [MNum x, MNum y] = MNum $ x + y
 add _ = error "Incorrect arguments to add."
 sub [MNum x, MNum y] = MNum $ x - y
 sub _ = error "Incorrect arguments to sub."
 mul [MNum x, MNum y] = MNum $ x * y
 mul _ = error "Incorrect arguments to mul."
-div [MNum x, MNum y] = MNum $ x `Prelude.div` y
-div _ = error "Incorrect arguments to div."
+divd [MNum x, MNum y] = MNum $ x `Prelude.div` y
+divd _ = error "Incorrect arguments to div."
 
 -- -------
 
@@ -51,7 +49,7 @@ malRead = readStr
 malPrint :: MVal -> String
 malPrint = prStr
 
-malEval :: EnvMap -> MVal -> MVal
+malEval :: Env-> MVal -> MVal
 malEval = eval
 
 rep :: String -> String
