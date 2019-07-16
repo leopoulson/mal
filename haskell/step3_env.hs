@@ -20,6 +20,7 @@ collapseList _ _ = error "Incorrect types for collapse list"
 
 applyList :: Env -> MVal -> MVal
 applyList _ (MList (MFun op : rest)) = collapseList op rest
+-- applyList _ (MList (MSym "def!" : k : v : rest)) = 
 applyList _ mv = mv
 
 eval :: Env -> MVal -> MVal
@@ -43,17 +44,17 @@ divd _ = error "Incorrect arguments to div."
 
 -- -------
 
-malRead :: String -> MVal
-malRead = readStr
+malRead :: (String, Env) -> (MVal, Env)
+malRead (st, env) = (readStr st, env) 
 
-malPrint :: MVal -> String
-malPrint = prStr
+malPrint :: (MVal, Env) -> (String, Env)
+malPrint (val, env) = (prStr val, env) 
 
-malEval :: Env-> MVal -> MVal
-malEval = eval
+malEval :: (MVal, Env) -> (MVal, Env)
+malEval (val, env) = (eval env val, env)
 
-rep :: String -> String
-rep = malPrint . malEval replEnv . malRead
+rep :: (String, Env) -> (String, Env)
+rep = malPrint . malEval . malRead
 
 repl :: HL.InputT IO ()
 repl = do
@@ -63,7 +64,7 @@ repl = do
     Just "" -> repl
     Just ":q" -> return ()
     Just input -> do
-      HL.outputStrLn $ rep input
+      HL.outputStrLn . fst $ rep (input, replEnv)
       repl
 
 main :: IO ()
