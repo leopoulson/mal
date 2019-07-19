@@ -7,3 +7,5 @@ prStr (MNum n) = show n
 prStr (MStr str) = show str
 prStr (MSym ch) = show ch
 prStr (MList ms) = "(" ++ unwords (map prStr ms) ++ ")"
+prStr (MFun _) = "Function"
+prStr (MErr err) = "Error: " ++ show err
