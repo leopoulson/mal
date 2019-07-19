@@ -6,9 +6,8 @@ where
 import Types
 
 import qualified Data.Map as Map
-import Data.Maybe (fromMaybe)
 
-import Debug.Trace as D
+-- import Debug.Trace as D
 
 type Key = MVal
 type Value = MVal
@@ -17,7 +16,7 @@ data Env = Env {inner :: Map.Map Key Value, outer :: Maybe Env}
   deriving (Eq, Show)
 
 set :: Key -> Value -> Env -> Env
-set k v env = trace (show v) Env (Map.insert k v $ inner env) (outer env)
+set k v env = Env (Map.insert k v $ inner env) (outer env)
 
 find :: Key -> Env -> Maybe Env
 find k env = if Map.member k (inner env)

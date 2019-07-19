@@ -6,9 +6,10 @@ import Printer
 import Env
 
 import Debug.Trace as D
+import Data.Maybe (fromMaybe)
 
 replEnv :: Env
-replEnv = set (MSym "def!") (MSym "def!") . 
+replEnv = set (MSym "def!") (MSym "def!") .
           set (MSym "/") (MFun divd) .
           set (MSym "*") (MFun mul) .
           set (MSym "-") (MFun sub) .
@@ -39,25 +40,27 @@ eval :: Env -> MVal -> (MVal, Env)
 eval env (MList (MSym "def!" : key : val : rest)) =
   case val' of
     MList (MErr err : _) -> trace "error" (MErr err, env)
-    _                    -> (MList (val' : rest), set key val' env)
+    -- _                    -> (MList (val' : rest), set key val' env)
+    _                    ->
+      case rest of
+        [] -> (val', set key val' env)
+        _  -> (MList (val' : rest), set key val' env)
   where val' = fst $ eval env val
 eval env (MList ms) = applyList env $ evalAST env (MList ms)
 eval env mv = (evalAST env mv, env)
 
 evalAST :: Env -> MVal -> MVal
 evalAST env (MList ms) = MList $ map (fst . eval env) ms
-evalAST env op@(MSym str) = case get op env of
-                              Nothing -> MErr $ "'" ++ str ++ "' not found."
-                              Just val -> val
+evalAST env op@(MSym str) = fromMaybe (MErr $ "'" ++ str ++ "' not found.") (get op env)
 evalAST _ mv = mv
 
 ----------------
 
 malRead :: (String, Env) -> (MVal, Env)
-malRead (st, env) = (readStr st, env) 
+malRead (st, env) = (readStr st, env)
 
 malPrint :: (MVal, Env) -> (String, Env)
-malPrint (val, env) = (prStr val, env) 
+malPrint (val, env) = (prStr val, env)
 
 malEval :: (MVal, Env) -> (MVal, Env)
 malEval (val, env) = eval env val
@@ -73,9 +76,9 @@ repl env = do
     Just "" -> repl env
     Just ":q" -> return ()
     Just input -> do
-      let (mval, env') = rep (input, env)
-      HL.outputStrLn mval
-      repl env'
+      let pair = rep (input, env)
+      HL.outputStrLn $ fst pair
+      repl $ snd pair
 
 main :: IO ()
 main = HL.runInputT HL.defaultSettings (repl replEnv)
