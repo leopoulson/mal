@@ -1,5 +1,5 @@
 module Env
-  (Env (..), set, find, get, newEnv)
+  (Env (..), set, find, get, newEnv, outerC)
 where
 
 
@@ -29,3 +29,5 @@ get k env = find k env >>= Map.lookup k . inner
 newEnv :: Env
 newEnv = Env Map.empty Nothing
 
+outerC :: Env -> Env
+outerC env = Env Map.empty (Just env)

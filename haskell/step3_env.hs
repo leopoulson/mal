@@ -10,6 +10,7 @@ import Data.Maybe (fromMaybe)
 
 replEnv :: Env
 replEnv = set (MSym "def!") (MSym "def!") .
+          set (MSym "let*") (MSym "let*") . 
           set (MSym "/") (MFun divd) .
           set (MSym "*") (MFun mul) .
           set (MSym "-") (MFun sub) .
@@ -36,16 +37,30 @@ applyList :: Env -> MVal -> (MVal, Env)
 applyList env (MList (MFun op : rest)) = (collapseList op rest, env)
 applyList env mv = (mv, env)
 
-eval :: Env -> MVal -> (MVal, Env)
-eval env (MList (MSym "def!" : key : val : rest)) =
+applyDef :: Env -> MVal -> (MVal, Env)
+applyDef env (MList (key : val : rest)) =
   case val' of
     MList (MErr err : _) -> trace "error" (MErr err, env)
-    -- _                    -> (MList (val' : rest), set key val' env)
     _                    ->
       case rest of
         [] -> (val', set key val' env)
         _  -> (MList (val' : rest), set key val' env)
   where val' = fst $ eval env val
+applyDef env mv = (mv, env)
+
+applyParams :: [MVal] -> Env -> Env
+applyParams (k : v : rest) env = applyParams rest env'
+  where
+    env' = set k (fst $ eval env v) env
+applyParams _ env = env
+
+applyLet :: Env -> MVal -> (MVal, Env)
+applyLet env (MList [MList params, form]) = (fst $ eval (applyParams params env) form, env)
+applyLet env mv = (mv, env)
+
+eval :: Env -> MVal -> (MVal, Env)
+eval env (MList (MSym "def!" : rest)) = applyDef env (MList rest)
+eval env (MList (MSym "let*" : rest)) = applyLet (outerC env) (MList rest)
 eval env (MList ms) = applyList env $ evalAST env (MList ms)
 eval env mv = (evalAST env mv, env)
 
