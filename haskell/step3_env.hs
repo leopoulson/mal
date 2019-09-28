@@ -8,26 +8,6 @@ import Env
 import Debug.Trace as D
 import Data.Maybe (fromMaybe)
 
-replEnv :: Env
-replEnv = set (MSym "def!") (MSym "def!") .
-          set (MSym "let*") (MSym "let*") . 
-          set (MSym "/") (MFun divd) .
-          set (MSym "*") (MFun mul) .
-          set (MSym "-") (MFun sub) .
-          set (MSym "+") (MFun add) $ newEnv
-
-add, sub, divd, mul :: [MVal] -> MVal
-add [MNum x, MNum y] = MNum $ x + y
-add _ = error "Incorrect arguments to add."
-sub [MNum x, MNum y] = MNum $ x - y
-sub _ = error "Incorrect arguments to sub."
-mul [MNum x, MNum y] = MNum $ x * y
-mul _ = error "Incorrect arguments to mul."
-divd [MNum x, MNum y] = MNum $ x `Prelude.div` y
-divd _ = error "Incorrect arguments to div."
-
---
-
 collapseList :: ([MVal] -> MVal) -> [MVal] -> MVal
 collapseList _ [MNum n] = MNum n
 collapseList f (x : y : rest) = collapseList f (f [x, y] : rest)
@@ -97,3 +77,22 @@ repl env = do
 
 main :: IO ()
 main = HL.runInputT HL.defaultSettings (repl replEnv)
+
+--------------------------------------------------------------------------------
+replEnv :: Env
+replEnv = set (MSym "def!") (MSym "def!") .
+          set (MSym "let*") (MSym "let*") . 
+          set (MSym "/") (MFun divd) .
+          set (MSym "*") (MFun mul) .
+          set (MSym "-") (MFun sub) .
+          set (MSym "+") (MFun add) $ newEnv
+
+add, sub, divd, mul :: [MVal] -> MVal
+add [MNum x, MNum y] = MNum $ x + y
+add _ = error "Incorrect arguments to add."
+sub [MNum x, MNum y] = MNum $ x - y
+sub _ = error "Incorrect arguments to sub."
+mul [MNum x, MNum y] = MNum $ x * y
+mul _ = error "Incorrect arguments to mul."
+divd [MNum x, MNum y] = MNum $ x `Prelude.div` y
+divd _ = error "Incorrect arguments to div."

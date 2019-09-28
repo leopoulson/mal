@@ -44,14 +44,23 @@ readNumber = readNum
 
 readAtom :: Parser MVal
 readAtom = readNumber
+  <|> try readBool
+  <|> try readNil
   <|> readSym
   -- <|> readString
 
 readList :: Parser MVal
-readList = MList <$> (char '(' *> whitespace *> readForm `sepEndBy` whitespace <* char ')') 
-  
+readList = MList <$> (char '(' *> whitespace *> readForm `sepEndBy` whitespace <* char ')')
+
 readForm :: Parser MVal
 readForm = whitespace *> (readList
   <|> readAtom)
+
+readBool :: Parser MVal
+readBool = MTrue <$ string "true"
+       <|> MFalse <$ string "false"
+
+readNil :: Parser MVal
+readNil = MNil <$ string "nil"
 
 -- (1 2, 3,,,,),,

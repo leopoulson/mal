@@ -6,7 +6,10 @@ data MVal =
   MSym String |
   MList [MVal] |
   MFun ([MVal] -> MVal) |
-  MErr String
+  MErr String |
+  MNil |
+  MTrue |
+  MFalse
 
 instance Eq MVal where
   MNum n == MNum m = n == m
@@ -14,6 +17,9 @@ instance Eq MVal where
   MSym ch == MSym ch' = ch == ch'
   MList ms == MList ms' = ms == ms'
   MErr e == MErr e' = e == e'
+  MNil == MNil = True
+  MTrue == MTrue = True
+  MFalse == MFalse = False
   _ == _ = False
 
 instance Show MVal where
@@ -23,6 +29,9 @@ instance Show MVal where
   show (MList ms) = "MList " ++ show ms
   show (MFun _) = "MFun"
   show (MErr err) = "MErr " ++ show err
+  show MNil = "nil"
+  show MTrue = "true"
+  show MFalse = "false"
 
 instance Ord MVal where
   compare (MNum a) (MNum b) = compare a b
@@ -31,5 +40,8 @@ instance Ord MVal where
   compare (MList a) (MList b) = compare a b
   compare (MErr a) (MErr b) = compare a b
   compare (MFun _) (MFun _) = EQ
-  compare (MNum _) _ = EQ
+  compare (MNum _) _ = EQ --why
+  compare MNil MNil = EQ
+  compare MTrue MTrue = EQ
+  compare MFalse MFalse = EQ
   compare _ _ = EQ

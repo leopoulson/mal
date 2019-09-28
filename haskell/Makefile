@@ -4,7 +4,7 @@
 # OTHER_SRCS = Readline.hs Types.hs Reader.hs Printer.hs Env.hs Core.hs
 # BINS = $(SRCS:%.hs=%)
 
-SRCS = step0_repl.hs step1_read_print.hs step2_eval.hs step3_env.hs
+SRCS = step0_repl.hs step1_read_print.hs step2_eval.hs step3_env.hs step4_if_fn_do.hs
 OTHER_SRCS = Types.hs Reader.hs Printer.hs Env.hs
 BINS = $(SRCS:%.hs=%)
 

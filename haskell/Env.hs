@@ -1,5 +1,5 @@
 module Env
-  (Env (..), set, find, get, newEnv, outerC)
+  (Env (..), set, find, get, newEnv, outerC, doBinds)
 where
 
 
@@ -31,3 +31,7 @@ newEnv = Env Map.empty Nothing
 
 outerC :: Env -> Env
 outerC env = Env Map.empty (Just env)
+
+doBinds :: [Key] -> [Value] -> Env -> Env
+doBinds (k:ks) (v:vs) env = doBinds ks vs (set k v env)
+doBinds _ _ env = env
